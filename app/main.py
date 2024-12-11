@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated
 from . import crud
 from .database import get_db, init_db
+from .gpio_controller import RelayController
 
 app = FastAPI()
 
@@ -17,8 +18,16 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database on startup"""
+    """Initialize database and GPIO on startup"""
     init_db()
+    # Initialize GPIO
+    RelayController()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup GPIO on shutdown"""
+    relay = RelayController()
+    relay.cleanup()
 
 class Device(BaseModel):
     id: str

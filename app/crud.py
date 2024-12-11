@@ -36,6 +36,10 @@ def toggle_device(db: Connection, device_id: str):
         else:
             new_status = "on" if device_dict['status'] == "off" else "off"
         
+        from .gpio_controller import RelayController
+        relay = RelayController()
+        relay.control_relay(device_dict['relay_port'], new_status)
+        
         cursor = db.cursor()
         cursor.execute(
             'UPDATE devices SET status = ? WHERE id = ?',
